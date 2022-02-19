@@ -3,19 +3,19 @@ import { ethers } from "ethers";
 
 import { contractABI, contractAddress } from "../utils/constants";
 
-export const TransactionContext = useContext();
+export const TransactionContext = React.createContext();
 
 const { ethereum } = window;
 
 const getEthereumContract = () => {
   const provider = new ethers.providers.Web3Provider(ethereum);
-  const igner = provider.getSigner();
+  const signer = provider.getSigner();
   const transactionContract = new ethers.Contract(
     contractAddress,
     contractABI,
     signer
   );
-  console.log(provider, igner, transactionContract);
+  console.log(provider, signer, transactionContract);
 };
 
 export const TransactionProvider = ({ children }) => {

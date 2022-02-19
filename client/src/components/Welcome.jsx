@@ -21,7 +21,7 @@ const Input = ({ placeholder, name, type, value, handleChange }) => (
 );
 
 const Welcome = () => {
-  const { value } = useContext(TransactionContext);
+  const value = useContext(TransactionContext);
 
   console.log(value);
   const handleChange = (e) => {};
