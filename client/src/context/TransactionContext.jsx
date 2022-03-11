@@ -94,6 +94,8 @@ export const TransactionProvider = ({ children }) => {
                 keyword,
                 message
             );
+
+            await transactionHash.wait();
         } catch (error) {
             console.log(error);
 
