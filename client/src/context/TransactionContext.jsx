@@ -15,11 +15,25 @@ const getEthereumContract = () => {
         contractABI,
         signer
     );
-    console.log(provider, signer, transactionContract);
+    return transactionContract;
 };
 
 export const TransactionProvider = ({ children }) => {
     const [currentAccount, setCurrentAccount] = React.useState("");
+    const [formData, setFormData] = React.useState({
+        addressTo: "",
+        amount: "",
+        keyword: "",
+        message: "",
+    });
+
+    const handleChange = (e, name) => {
+        setFormData((previousData) => ({
+            ...previousData,
+            [name]: e.target.value,
+        }));
+    };
+
     const checkIfWalletIsConnected = async () => {
         try {
             if (!ethereum) return alert("Please install metamask");
@@ -54,11 +68,53 @@ export const TransactionProvider = ({ children }) => {
         }
     };
 
+    const sendTransaction = async () => {
+        try {
+            if (!ethereum) return alert("Please install metamask");
+
+            const { addressTo, amount, keyword, message } = formData;
+            const transactionContract = getEthereumContract();
+            const parsedAmount = ethers.utils.parseEther(amount);
+
+            ethereum.request({
+                method: "eth_sendTransaction",
+                params: [
+                    {
+                        from: currentAccount,
+                        to: addressTo,
+                        gas: "0x5208", // 21000 GWEI
+                        value: parsedAmount._hex,
+                    },
+                ],
+            });
+
+            const transactionHash = await transactionContract.addToBlockchain(
+                addressTo,
+                parsedAmount,
+                keyword,
+                message
+            );
+        } catch (error) {
+            console.log(error);
+
+            throw new Error("No ethereum object");
+        }
+    };
+
     React.useEffect(() => {
         checkIfWalletIsConnected();
     }, []);
+
     return (
-        <TransactionContext.Provider value={{ connectWallet, currentAccount }}>
+        <TransactionContext.Provider
+            value={{
+                currentAccount,
+                formData,
+                connectWallet,
+                handleChange,
+                sendTransaction,
+            }}
+        >
             {children}
         </TransactionContext.Provider>
     );
