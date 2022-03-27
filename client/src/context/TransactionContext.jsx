@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { ethers } from "ethers";
 
 import { contractABI, contractAddress } from "../utils/constants";
@@ -19,6 +19,8 @@ const getEthereumContract = () => {
 };
 
 export const TransactionProvider = ({ children }) => {
+    const [isLoading, setIsLoading] = React.useState(false);
+    const [transactionCount, setTransactionCount] = React.useState(localStorage.getItem('transactionCount '));
     const [currentAccount, setCurrentAccount] = React.useState("");
     const [formData, setFormData] = React.useState({
         addressTo: "",
@@ -76,6 +78,8 @@ export const TransactionProvider = ({ children }) => {
             const transactionContract = getEthereumContract();
             const parsedAmount = ethers.utils.parseEther(amount);
 
+            setIsLoading(true);
+
             ethereum.request({
                 method: "eth_sendTransaction",
                 params: [
@@ -95,7 +99,15 @@ export const TransactionProvider = ({ children }) => {
                 message
             );
 
+            console.log(`Loading: ${transactionHash.hash}`)
             await transactionHash.wait();
+
+            const transactionCountVal = transactionContract.getTransactionCount();
+            setTransactionCount(transactionCountVal)
+            console.log(transactionCountVal)
+
+            setIsLoading(false);
+            console.log(`Done: ${transactionHash.hash}`)
         } catch (error) {
             console.log(error);
 
@@ -112,6 +124,7 @@ export const TransactionProvider = ({ children }) => {
             value={{
                 currentAccount,
                 formData,
+                isLoading,
                 connectWallet,
                 handleChange,
                 sendTransaction,
